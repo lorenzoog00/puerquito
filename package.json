@@ -6,6 +6,7 @@
   "scripts": {
     "dev:server": "tsx watch server/index.ts",
     "dev:client": "vite",
+    "local": "npm run build:client && tsx server/local.ts",
     "build:client": "vite build",
     "build:server": "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js",
     "build": "npm run build:client && npm run build:server",

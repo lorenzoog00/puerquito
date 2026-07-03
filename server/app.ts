@@ -1,6 +1,5 @@
 import express, { type Express } from "express";
 import path from "path";
-import { fileURLToPath } from "url";
 import { buildSession, mountAuth } from "./auth";
 import { mountAccounts } from "./routes/accounts";
 import { mountCategories } from "./routes/categories";
@@ -24,9 +23,8 @@ export function createApp(): Express {
     res.json({ ok: true });
   });
 
-  if (process.env.NODE_ENV === "production") {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const clientDir = path.join(__dirname, "client");
+  if (process.env.NODE_ENV === "production" || process.env.SERVE_STATIC === "true") {
+    const clientDir = path.resolve(process.cwd(), "dist/client");
     app.use(express.static(clientDir));
     app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api")) return next();
