@@ -14,7 +14,7 @@ export function Layout() {
           <IconHome size={22} /><span>Inicio</span>
         </NavLink>
         <NavLink to="/ahorro" className="tab">
-          <IconPig size={22} /><span>Ahorro</span>
+          <IconPig size={22} /><span>Metas</span>
         </NavLink>
 
         <button className="tab-add" onClick={() => nav("/registrar")} aria-label="Registrar">

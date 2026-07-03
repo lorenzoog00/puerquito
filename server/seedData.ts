@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { accounts, categories, recurring, presets, settings, savingsGoal } from "@shared/schema";
+import { accounts, categories, recurring, presets, settings, savingsGoal, goals } from "@shared/schema";
 
 // Idempotent personalized seed for Lorenzo. Safe to run on every boot:
 // it only creates rows that don't exist yet.
@@ -46,5 +46,11 @@ export async function seedPersonalData() {
     { label: "Quincena", amount: 2600000, type: "income", accountId: debit.id, categoryId: cat("Salario"), sort: 0 },
     { label: "Restaurante", amount: 15000, type: "expense", accountId: credit.id, categoryId: cat("Restaurantes"), sort: 1 },
     { label: "Entretenimiento", amount: 20000, type: "expense", accountId: credit.id, categoryId: cat("Entretenimiento"), sort: 2 },
+  ]);
+
+  // Example goals (editable/deletable) so the checklist has something to show.
+  await db.insert(goals).values([
+    { name: "Viaje", monthlyAmount: 200000, targetAmount: 2400000 },
+    { name: "Laptop", monthlyAmount: 150000, targetAmount: 3000000 },
   ]);
 }

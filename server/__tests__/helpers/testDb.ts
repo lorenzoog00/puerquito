@@ -3,7 +3,7 @@ import { db } from "../../db";
 
 export async function resetDb() {
   await db.execute(
-    sql`TRUNCATE transactions, recurring, presets, settings, goals, savings_entries, savings_goal, categories, accounts RESTART IDENTITY CASCADE`
+    sql`TRUNCATE transactions, recurring, presets, settings, goal_contributions, goals, savings_entries, savings_goal, categories, accounts RESTART IDENTITY CASCADE`
   );
 }
 

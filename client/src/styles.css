@@ -184,6 +184,36 @@ button:active { background: var(--accent-2); }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .toast-undo { background: transparent; color: #a5b4fc; font-weight: 700; padding: 4px 8px; min-height: 0; }
 
+/* Checklist items */
+.check-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: #fafbfe; color: var(--ink); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px; margin-top: 8px; text-align: left; min-height: 0;
+  font-weight: 600;
+}
+.check-item:active { background: #f1f2fb; }
+.check-circle {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid #cbd2e0; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 15px; font-weight: 800;
+}
+.check-item.done { background: #f0fdf4; border-color: #bbf7d0; }
+.check-item.done .check-circle { background: var(--good); border-color: var(--good); }
+.check-item.done .check-label { color: var(--good); text-decoration: none; }
+.check-label { flex: 1; }
+.check-amount { color: var(--muted); font-weight: 700; }
+.check-item.done .check-amount { color: var(--good); }
+
+/* History dots + streak */
+.dots { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.dot {
+  width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; background: #f1f2f6; color: #b6bcc9; border: 1px solid var(--line);
+}
+.dot.on { background: var(--accent-soft); color: var(--accent); border-color: #c7d0f7; }
+.streak { margin-left: auto; font-size: 13px; font-weight: 700; color: #b45309; background: #fef3c7; padding: 4px 10px; border-radius: 999px; }
+.link { color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 600; }
+
 /* Goals */
 .goal { padding: 14px 0; border-bottom: 1px solid #f2f3f7; }
 .goal:first-of-type { padding-top: 4px; }

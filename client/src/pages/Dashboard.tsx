@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { useAccounts, useTransactions, useSavings, useGoal, usePresets, useSettings, useMutate } from "../hooks";
+import { Link, useNavigate } from "react-router-dom";
+import { useAccounts, useTransactions, useSavings, useGoal, useGoals, usePresets, useSettings, useMutate } from "../hooks";
 import { Money } from "../components/Money";
 import { useToast } from "../toast";
 
@@ -14,11 +14,47 @@ export function Dashboard() {
   const { data: txns = [] } = useTransactions(thisMonth());
   const { data: savings = [] } = useSavings();
   const { data: goal } = useGoal();
+  const { data: goals = [] } = useGoals();
   const { data: presets = [] } = usePresets();
   const { data: settings } = useSettings();
   const logPreset = useMutate(["transactions", "accounts"]);
   const delTxn = useMutate(["transactions", "accounts"]);
+  const mSav = useMutate(["savings"]);
+  const mGoal = useMutate(["goals"]);
   const { notify } = useToast();
+
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth() + 1;
+  const half = now.getUTCDate() <= 15 ? 1 : 2;
+  const ymKey = `${year}-${String(month).padStart(2, "0")}`;
+
+  const disponible = accounts.filter((a: any) => a.type !== "savings").reduce((s: number, a: any) => s + a.balance, 0);
+  const target = goal?.quincenaTarget ?? 0;
+
+  // Build "esta quincena" checklist
+  const savEntry = savings.find((e: any) => e.year === year && e.month === month && e.quincenaHalf === half);
+  const ahorroDone = !!savEntry;
+
+  function toggleAhorro() {
+    if (ahorroDone) {
+      mSav.mutate({ path: `/api/savings/entries/${savEntry.id}`, method: "DELETE" });
+    } else {
+      mSav.mutate({ path: "/api/savings/entries", method: "POST", body: { year, month, quincenaHalf: half, amountSaved: target / 100 } });
+    }
+  }
+
+  const goalItems = goals.filter((g: any) => g.monthlyAmount > 0).map((g: any) => ({
+    g, done: (g.contributedMonths || []).includes(ymKey),
+  }));
+
+  function toggleGoal(g: any, done: boolean) {
+    if (done) mGoal.mutate({ path: `/api/goals/${g.id}/check?year=${year}&month=${month}`, method: "DELETE" });
+    else mGoal.mutate({ path: `/api/goals/${g.id}/check`, method: "POST", body: { year, month } });
+  }
+
+  const doneCount = (ahorroDone ? 1 : 0) + goalItems.filter((i: any) => i.done).length;
+  const totalCount = 1 + goalItems.length;
 
   function tapPreset(p: any) {
     logPreset.mutate(
@@ -27,26 +63,7 @@ export function Dashboard() {
     );
   }
 
-  const now = new Date();
-  const half = now.getUTCDate() <= 15 ? 1 : 2;
-
-  // Money left = everything you can spend (all accounts except savings)
-  const disponible = accounts
-    .filter((a: any) => a.type !== "savings")
-    .reduce((s: number, a: any) => s + a.balance, 0);
-
-  const total = savings.length ? savings[savings.length - 1].total : 0;
-  const overall = goal?.overallGoal ?? null;
-  const pct = overall ? Math.min(100, Math.round((total / overall) * 100)) : 0;
-
-  const thisQ = savings.find(
-    (e: any) => e.year === now.getUTCFullYear() && e.month === now.getUTCMonth() + 1 && e.quincenaHalf === half
-  );
-  const savedQ = thisQ?.amountSaved ?? 0;
-  const goalQ = thisQ?.goal ?? goal?.quincenaTarget ?? 0;
-  const qpct = goalQ ? Math.min(100, Math.round((savedQ / goalQ) * 100)) : 0;
-
-  const recent = [...txns].slice(0, 6);
+  const recent = [...txns].slice(0, 4);
   const name = settings?.ownerName;
 
   return (
@@ -59,17 +76,39 @@ export function Dashboard() {
       <div className="hero card">
         <span className="hero-label">Dinero disponible</span>
         <div className="hero-value"><Money cents={disponible} /></div>
-        <span className="muted">Lo que puedes gastar (sin contar ahorro)</span>
+        <span className="muted">Lo que puedes gastar sin tocar tu ahorro</span>
       </div>
 
-      <button className="big-log" onClick={() => nav("/registrar")}>+ Registrar movimiento</button>
+      <div className="card">
+        <div className="between" style={{ marginBottom: 8 }}>
+          <h3 style={{ margin: 0 }}>Esta quincena</h3>
+          <span className="pill">{doneCount} de {totalCount}</span>
+        </div>
+
+        <button className={"check-item " + (ahorroDone ? "done" : "")} onClick={toggleAhorro}>
+          <span className="check-circle">{ahorroDone ? "✓" : ""}</span>
+          <span className="check-label">Ahorrar</span>
+          <span className="check-amount"><Money cents={target} /></span>
+        </button>
+
+        {goalItems.map(({ g, done }: any) => (
+          <button key={g.id} className={"check-item " + (done ? "done" : "")} onClick={() => toggleGoal(g, done)}>
+            <span className="check-circle">{done ? "✓" : ""}</span>
+            <span className="check-label">Abonar a {g.name}</span>
+            <span className="check-amount"><Money cents={g.monthlyAmount} /></span>
+          </button>
+        ))}
+
+        {goalItems.length === 0 && <p className="muted" style={{ margin: "6px 0 0" }}>Agrega metas en la pestaña Metas para verlas aquí.</p>}
+      </div>
+
+      <button className="big-log" onClick={() => nav("/registrar")}>+ Registrar gasto</button>
 
       {presets.length > 0 && (
         <div className="preset-row">
           {presets.map((p: any) => (
             <button key={p.id} className={"preset " + (p.type === "income" ? "preset-in" : "")}
-              disabled={logPreset.isPending}
-              onClick={() => tapPreset(p)}>
+              disabled={logPreset.isPending} onClick={() => tapPreset(p)}>
               <span className="preset-label">{p.label}</span>
               <span className="preset-amount">{p.type === "income" ? "+" : ""}<Money cents={p.amount} /></span>
             </button>
@@ -77,43 +116,20 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="card tappable" onClick={() => nav("/ahorro")}>
-        <div className="between">
-          <h3>Ahorro total</h3>
-          <span className="menu-chev">›</span>
+      <div className="card">
+        <div className="between" style={{ marginBottom: 6 }}>
+          <h3 style={{ margin: 0 }}>Últimos movimientos</h3>
+          <Link to="/historial" className="link">Ver todo ›</Link>
         </div>
-        <div className="stat"><Money cents={total} /></div>
-        {overall != null ? (
-          <>
-            <div className="bar"><span style={{ width: pct + "%" }} /></div>
-            <span className="muted">Meta <Money cents={overall} /> · {pct}%</span>
-          </>
-        ) : <span className="muted">Define tu meta total en Ajustes</span>}
-      </div>
-
-      <div className="card">
-        <h3>Ahorro esta quincena</h3>
-        <div className="stat"><Money cents={savedQ} /></div>
-        <div className="bar"><span style={{ width: qpct + "%" }} /></div>
-        <span className="muted">Meta <Money cents={goalQ} /></span>
-      </div>
-
-      <div className="card">
-        <h3>Movimientos recientes</h3>
-        <table>
-          <tbody>
-            {recent.map((t: any) => (
-              <tr key={t.id}>
-                <td className="muted">{t.date.slice(5)}</td>
-                <td>{t.note || t.type}</td>
-                <td className="right" style={{ color: t.type === "income" ? "var(--good)" : "var(--ink)" }}>
-                  {t.type === "income" ? "+" : "−"}<Money cents={t.amount} />
-                </td>
-              </tr>
-            ))}
-            {recent.length === 0 && <tr><td className="muted">Aún no hay movimientos.</td></tr>}
-          </tbody>
-        </table>
+        {recent.map((t: any) => (
+          <div key={t.id} className="between goal-row">
+            <span>{t.note || t.type} <span className="muted" style={{ fontSize: 13 }}>· {t.date.slice(5)}</span></span>
+            <span style={{ color: t.type === "income" ? "var(--good)" : "var(--ink)", fontWeight: 600 }}>
+              {t.type === "income" ? "+" : "−"}<Money cents={t.amount} />
+            </span>
+          </div>
+        ))}
+        {recent.length === 0 && <p className="muted" style={{ margin: "4px 0 0" }}>Aún no hay movimientos.</p>}
       </div>
     </div>
   );

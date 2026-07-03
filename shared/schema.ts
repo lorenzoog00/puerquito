@@ -64,8 +64,18 @@ export const goals = pgTable("goals", {
   name: text("name").notNull(),
   monthlyAmount: integer("monthly_amount").notNull().default(0), // cents/month
   targetAmount: integer("target_amount"), // cents, nullable
-  saved: integer("saved").notNull().default(0), // cents accumulated
+  saved: integer("saved").notNull().default(0), // cents accumulated (= sum of contributions)
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// One row per (goal, month) the user has contributed. Drives the monthly
+// check-off, history dots and streak.
+export const goalContributions = pgTable("goal_contributions", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => goals.id),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(), // 1-12
+  amount: integer("amount").notNull(), // cents contributed that month
 });
 
 export const savingsEntries = pgTable("savings_entries", {
@@ -88,3 +98,4 @@ export type SavingsEntry = typeof savingsEntries.$inferSelect;
 export type Preset = typeof presets.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
 export type Goal = typeof goals.$inferSelect;
+export type GoalContribution = typeof goalContributions.$inferSelect;
