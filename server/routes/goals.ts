@@ -5,6 +5,7 @@ import { goals, goalContributions } from "@shared/schema";
 import { goalInput, contributeInput } from "@shared/validators";
 import { requireAuth } from "../auth";
 import { toCents } from "../lib/money";
+import { createSavingsTransfer, deleteTransfer } from "../lib/savingsTxn";
 
 function ym(req: any) {
   const now = new Date();
@@ -20,24 +21,27 @@ async function recompute(goalId: number) {
   await db.update(goals).set({ saved: Math.max(0, sum) }).where(eq(goals.id, goalId));
 }
 
-// Attach the "YYYY-MM" months a goal has a positive contribution in.
+// Attach the distinct "YYYY-MM" months a goal has a positive contribution in.
 async function withMonths(goal: any) {
   const rows = await db.select().from(goalContributions)
     .where(eq(goalContributions.goalId, goal.id))
     .orderBy(asc(goalContributions.year), asc(goalContributions.month));
-  const contributedMonths = rows
-    .filter((r) => r.amount > 0)
-    .map((r) => `${r.year}-${String(r.month).padStart(2, "0")}`);
-  return { ...goal, contributedMonths };
+  const set = new Set<string>();
+  for (const r of rows) if (r.amount > 0) set.add(`${r.year}-${String(r.month).padStart(2, "0")}`);
+  return { ...goal, contributedMonths: [...set] };
 }
 
-async function findMonthRow(goalId: number, year: number, month: number) {
-  const [row] = await db.select().from(goalContributions).where(and(
+async function monthRows(goalId: number, year: number, month: number) {
+  return db.select().from(goalContributions).where(and(
     eq(goalContributions.goalId, goalId),
     eq(goalContributions.year, year),
     eq(goalContributions.month, month),
   ));
-  return row;
+}
+
+async function returnGoal(res: any, id: number) {
+  const [updated] = await db.select().from(goals).where(eq(goals.id, id));
+  res.json(await withMonths(updated));
 }
 
 export function mountGoals(app: Express) {
@@ -72,12 +76,14 @@ export function mountGoals(app: Express) {
 
   app.delete("/api/goals/:id", requireAuth, async (req, res) => {
     const id = Number(req.params.id);
+    const rows = await db.select().from(goalContributions).where(eq(goalContributions.goalId, id));
+    for (const r of rows) await deleteTransfer(r.txnId);
     await db.delete(goalContributions).where(eq(goalContributions.goalId, id));
     await db.delete(goals).where(eq(goals.id, id));
     res.json({ ok: true });
   });
 
-  // Manual deposit of an arbitrary amount for a month (adds to that month's row).
+  // Manual deposit of an arbitrary amount (records a contribution + moves money out of Débito).
   app.post("/api/goals/:id/contribute", requireAuth, async (req, res) => {
     const p = contributeInput.safeParse(req.body);
     if (!p.success) return res.status(400).json({ error: p.error.flatten() });
@@ -86,37 +92,33 @@ export function mountGoals(app: Express) {
     if (!goal) return res.status(404).json({ error: "not found" });
     const { year, month } = ym(req);
     const cents = toCents(p.data.amount);
-    const existing = await findMonthRow(id, year, month);
-    if (existing) {
-      await db.update(goalContributions).set({ amount: existing.amount + cents })
-        .where(eq(goalContributions.id, existing.id));
-    } else {
-      await db.insert(goalContributions).values({ goalId: id, year, month, amount: cents });
-    }
+    const txnId = await createSavingsTransfer(cents, `Abono: ${goal.name}`);
+    await db.insert(goalContributions).values({ goalId: id, year, month, amount: cents, txnId });
     await recompute(id);
-    const [updated] = await db.select().from(goals).where(eq(goals.id, id));
-    res.json(await withMonths(updated));
+    await returnGoal(res, id);
   });
 
-  // Check off this month: contribute the monthly amount (idempotent).
+  // Check off this month: contribute the monthly amount (idempotent per month).
   app.post("/api/goals/:id/check", requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     const [goal] = await db.select().from(goals).where(eq(goals.id, id));
     if (!goal) return res.status(404).json({ error: "not found" });
     const { year, month } = ym(req);
-    const existing = await findMonthRow(id, year, month);
-    if (!existing) {
-      await db.insert(goalContributions).values({ goalId: id, year, month, amount: goal.monthlyAmount });
+    const existing = await monthRows(id, year, month);
+    if (existing.length === 0) {
+      const txnId = await createSavingsTransfer(goal.monthlyAmount, `Abono: ${goal.name}`);
+      await db.insert(goalContributions).values({ goalId: id, year, month, amount: goal.monthlyAmount, txnId });
       await recompute(id);
     }
-    const [updated] = await db.select().from(goals).where(eq(goals.id, id));
-    res.json(await withMonths(updated));
+    await returnGoal(res, id);
   });
 
-  // Uncheck this month: remove the month's contribution.
+  // Uncheck this month: remove the month's contributions and their linked transfers.
   app.delete("/api/goals/:id/check", requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     const { year, month } = ym(req);
+    const rows = await monthRows(id, year, month);
+    for (const r of rows) await deleteTransfer(r.txnId);
     await db.delete(goalContributions).where(and(
       eq(goalContributions.goalId, id),
       eq(goalContributions.year, year),

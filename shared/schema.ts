@@ -76,6 +76,7 @@ export const goalContributions = pgTable("goal_contributions", {
   year: integer("year").notNull(),
   month: integer("month").notNull(), // 1-12
   amount: integer("amount").notNull(), // cents contributed that month
+  txnId: integer("txn_id"), // linked transfer transaction (money leaving Débito)
 });
 
 export const savingsEntries = pgTable("savings_entries", {
@@ -86,6 +87,7 @@ export const savingsEntries = pgTable("savings_entries", {
   amountSaved: integer("amount_saved").notNull(), // cents
   goalOverride: integer("goal_override"), // cents, nullable
   note: text("note"),
+  txnId: integer("txn_id"), // linked transfer transaction (money leaving Débito)
 });
 
 export type Account = typeof accounts.$inferSelect;

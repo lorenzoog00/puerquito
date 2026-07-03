@@ -39,6 +39,26 @@ describe("goals API", () => {
     expect(res.body.saved).toBe(0);
   });
 
+  it("checking a goal moves money out of Débito (reduces balance); uncheck restores it", async () => {
+    const a = request.agent(createApp());
+    await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
+    const acc = await a.post("/api/accounts").send({ name: "Débito", type: "bank", startingBalance: 26000 });
+    const g = await a.post("/api/goals").send({ name: "Viaje", monthlyAmount: 2000 });
+
+    await a.post(`/api/goals/${g.body.id}/check`).send({ year: 2026, month: 7 });
+    let accounts = await a.get("/api/accounts");
+    expect(accounts.body[0].balance).toBe(2400000); // 26000 - 2000 = 24000
+
+    const txns = await a.get("/api/transactions");
+    expect(txns.body.some((t: any) => t.type === "transfer" && t.amount === 200000)).toBe(true);
+
+    await a.delete(`/api/goals/${g.body.id}/check?year=2026&month=7`);
+    accounts = await a.get("/api/accounts");
+    expect(accounts.body[0].balance).toBe(2600000); // restored
+    const txns2 = await a.get("/api/transactions");
+    expect(txns2.body).toHaveLength(0);
+  });
+
   it("check marks the month done and uncheck removes it", async () => {
     const a = request.agent(createApp());
     await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });

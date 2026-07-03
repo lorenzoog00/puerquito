@@ -19,8 +19,8 @@ export function Dashboard() {
   const { data: settings } = useSettings();
   const logPreset = useMutate(["transactions", "accounts"]);
   const delTxn = useMutate(["transactions", "accounts"]);
-  const mSav = useMutate(["savings"]);
-  const mGoal = useMutate(["goals"]);
+  const mSav = useMutate(["savings", "accounts", "transactions"]);
+  const mGoal = useMutate(["goals", "accounts", "transactions"]);
   const { notify } = useToast();
 
   const now = new Date();

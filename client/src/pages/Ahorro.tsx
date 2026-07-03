@@ -32,8 +32,8 @@ export function Ahorro() {
   const { data: entries = [] } = useSavings();
   const { data: goal } = useGoal();
   const { data: goals = [] } = useGoals();
-  const mSav = useMutate(["savings", "goal"]);
-  const mg = useMutate(["goals"]);
+  const mSav = useMutate(["savings", "goal", "accounts", "transactions"]);
+  const mg = useMutate(["goals", "accounts", "transactions"]);
   const now = new Date();
   const year = now.getUTCFullYear();
   const month = now.getUTCMonth() + 1;

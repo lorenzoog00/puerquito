@@ -5,6 +5,7 @@ import { savingsGoal, savingsEntries } from "@shared/schema";
 import { savingsEntryInput, savingsGoalInput } from "@shared/validators";
 import { requireAuth } from "../auth";
 import { toCents } from "../lib/money";
+import { createSavingsTransfer, updateTransferAmount, deleteTransfer } from "../lib/savingsTxn";
 
 async function getGoalRow() {
   const rows = await db.select().from(savingsGoal).limit(1);
@@ -60,15 +61,19 @@ export function mountSavings(app: Express) {
     };
     let row;
     if (existing.length) {
+      await updateTransferAmount(existing[0].txnId, values.amountSaved);
       [row] = await db.update(savingsEntries).set(values)
         .where(eq(savingsEntries.id, existing[0].id)).returning();
     } else {
-      [row] = await db.insert(savingsEntries).values(values).returning();
+      const txnId = await createSavingsTransfer(values.amountSaved, "Ahorro de quincena");
+      [row] = await db.insert(savingsEntries).values({ ...values, txnId }).returning();
     }
     res.json(row);
   });
 
   app.delete("/api/savings/entries/:id", requireAuth, async (req, res) => {
+    const [entry] = await db.select().from(savingsEntries).where(eq(savingsEntries.id, Number(req.params.id)));
+    if (entry) await deleteTransfer(entry.txnId);
     await db.delete(savingsEntries).where(eq(savingsEntries.id, Number(req.params.id)));
     res.json({ ok: true });
   });
