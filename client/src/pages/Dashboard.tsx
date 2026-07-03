@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAccounts, useTransactions, useSavings, useGoal, usePresets, useSettings, useMutate } from "../hooks";
 import { Money } from "../components/Money";
+import { useToast } from "../toast";
 
 function thisMonth() {
   const d = new Date();
@@ -16,6 +17,15 @@ export function Dashboard() {
   const { data: presets = [] } = usePresets();
   const { data: settings } = useSettings();
   const logPreset = useMutate(["transactions", "accounts"]);
+  const delTxn = useMutate(["transactions", "accounts"]);
+  const { notify } = useToast();
+
+  function tapPreset(p: any) {
+    logPreset.mutate(
+      { path: `/api/presets/${p.id}/log`, method: "POST" },
+      { onSuccess: (row: any) => notify(`${p.label} registrado`, () => delTxn.mutate({ path: `/api/transactions/${row.id}`, method: "DELETE" })) }
+    );
+  }
 
   const now = new Date();
   const half = now.getUTCDate() <= 15 ? 1 : 2;
@@ -52,12 +62,14 @@ export function Dashboard() {
         <span className="muted">Lo que puedes gastar (sin contar ahorro)</span>
       </div>
 
+      <button className="big-log" onClick={() => nav("/registrar")}>+ Registrar movimiento</button>
+
       {presets.length > 0 && (
         <div className="preset-row">
           {presets.map((p: any) => (
             <button key={p.id} className={"preset " + (p.type === "income" ? "preset-in" : "")}
               disabled={logPreset.isPending}
-              onClick={() => logPreset.mutate({ path: `/api/presets/${p.id}/log`, method: "POST" })}>
+              onClick={() => tapPreset(p)}>
               <span className="preset-label">{p.label}</span>
               <span className="preset-amount">{p.type === "income" ? "+" : ""}<Money cents={p.amount} /></span>
             </button>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAccounts, useCategories, usePresets, useMutate } from "../hooks";
 import { Money } from "../components/Money";
 import { IconBack } from "../components/Icons";
+import { useToast } from "../toast";
 
 export function Registrar() {
   const nav = useNavigate();
@@ -11,6 +12,8 @@ export function Registrar() {
   const { data: presets = [] } = usePresets();
   const logPreset = useMutate(["transactions", "accounts"]);
   const addTxn = useMutate(["transactions", "accounts"]);
+  const delTxn = useMutate(["transactions", "accounts"]);
+  const { notify } = useToast();
 
   const [cents, setCents] = useState(0);
   const [type, setType] = useState("expense");
@@ -45,12 +48,25 @@ export function Registrar() {
           type,
         },
       },
-      { onSuccess: () => nav("/") }
+      {
+        onSuccess: (row: any) => {
+          notify("Movimiento registrado", () => delTxn.mutate({ path: `/api/transactions/${row.id}`, method: "DELETE" }));
+          nav("/");
+        },
+      }
     );
   }
 
-  function tapPreset(id: number) {
-    logPreset.mutate({ path: `/api/presets/${id}/log`, method: "POST" }, { onSuccess: () => nav("/") });
+  function tapPreset(id: number, label: string) {
+    logPreset.mutate(
+      { path: `/api/presets/${id}/log`, method: "POST" },
+      {
+        onSuccess: (row: any) => {
+          notify(`${label} registrado`, () => delTxn.mutate({ path: `/api/transactions/${row.id}`, method: "DELETE" }));
+          nav("/");
+        },
+      }
+    );
   }
 
   return (
@@ -64,7 +80,7 @@ export function Registrar() {
         <div className="preset-row" style={{ marginBottom: 18 }}>
           {presets.map((p: any) => (
             <button key={p.id} className={"preset " + (p.type === "income" ? "preset-in" : "")}
-              disabled={logPreset.isPending} onClick={() => tapPreset(p.id)}>
+              disabled={logPreset.isPending} onClick={() => tapPreset(p.id, p.label)}>
               <span className="preset-label">{p.label}</span>
               <span className="preset-amount">{p.type === "income" ? "+" : ""}<Money cents={p.amount} /></span>
             </button>

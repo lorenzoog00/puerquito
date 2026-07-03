@@ -83,7 +83,18 @@ export function Ahorro() {
             <div key={g.id} className="goal">
               <div className="between">
                 <strong>{g.name}</strong>
-                <span className="muted"><Money cents={g.monthlyAmount} />/mes</span>
+                <span className="muted month-edit">
+                  $<input
+                    className="inline-num"
+                    type="number"
+                    inputMode="numeric"
+                    defaultValue={g.monthlyAmount / 100}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (v !== g.monthlyAmount / 100) mg.mutate({ path: `/api/goals/${g.id}`, method: "PATCH", body: { monthlyAmount: v } });
+                    }}
+                  />/mes
+                </span>
               </div>
               <div className="between">
                 <span><Money cents={g.saved} />{g.targetAmount ? <> de <Money cents={g.targetAmount} /></> : null}</span>
