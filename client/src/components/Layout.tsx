@@ -1,32 +1,33 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { useAuth } from "../auth";
-
-const links: [string, string][] = [
-  ["/", "Inicio"],
-  ["/transactions", "Movimientos"],
-  ["/budgets", "Presupuestos"],
-  ["/accounts", "Cuentas"],
-  ["/recurring", "Recurrentes"],
-  ["/ahorro", "Ahorro"],
-  ["/ajustes", "Ajustes"],
-];
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { IconHome, IconPig, IconList, IconMore, IconPlus } from "./Icons";
 
 export function Layout() {
-  const { logout } = useAuth();
+  const nav = useNavigate();
   return (
-    <div className="layout">
-      <nav className="sidebar">
-        <div className="brand">Puerquito</div>
-        {links.map(([to, label]) => (
-          <NavLink key={to} to={to} end={to === "/"}>
-            {label}
-          </NavLink>
-        ))}
-        <button onClick={logout} className="logout">Salir</button>
-      </nav>
-      <main className="content">
+    <div className="app">
+      <main className="app-main">
         <Outlet />
       </main>
+
+      <nav className="tabbar">
+        <NavLink to="/" end className="tab">
+          <IconHome size={22} /><span>Inicio</span>
+        </NavLink>
+        <NavLink to="/ahorro" className="tab">
+          <IconPig size={22} /><span>Ahorro</span>
+        </NavLink>
+
+        <button className="tab-add" onClick={() => nav("/registrar")} aria-label="Registrar">
+          <IconPlus size={26} />
+        </button>
+
+        <NavLink to="/historial" className="tab">
+          <IconList size={22} /><span>Historial</span>
+        </NavLink>
+        <NavLink to="/mas" className="tab">
+          <IconMore size={22} /><span>Más</span>
+        </NavLink>
+      </nav>
     </div>
   );
 }

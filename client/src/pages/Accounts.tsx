@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAccounts, useMutate } from "../hooks";
 import { Money } from "../components/Money";
+import { SubHeader } from "../components/SubHeader";
 
 const TYPES: [string, string][] = [
   ["cash", "Efectivo"],
@@ -24,8 +25,8 @@ export function Accounts() {
   }
 
   return (
-    <div>
-      <h2>Cuentas</h2>
+    <div className="screen">
+      <SubHeader title="Cuentas" />
       <div className="card">
         {accounts.length === 0 && <small>Aún no tienes cuentas.</small>}
         {accounts.map((a: any) => (

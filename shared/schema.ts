@@ -59,6 +59,15 @@ export const settings = pgTable("settings", {
   ownerName: text("owner_name"),
 });
 
+export const goals = pgTable("goals", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  monthlyAmount: integer("monthly_amount").notNull().default(0), // cents/month
+  targetAmount: integer("target_amount"), // cents, nullable
+  saved: integer("saved").notNull().default(0), // cents accumulated
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const savingsEntries = pgTable("savings_entries", {
   id: serial("id").primaryKey(),
   year: integer("year").notNull(),
@@ -78,3 +87,4 @@ export type Recurring = typeof recurring.$inferSelect;
 export type SavingsEntry = typeof savingsEntries.$inferSelect;
 export type Preset = typeof presets.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
+export type Goal = typeof goals.$inferSelect;

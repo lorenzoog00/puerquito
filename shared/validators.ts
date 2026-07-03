@@ -61,6 +61,16 @@ export const settingsInput = z.object({
   ownerName: z.string().nullish(),
 });
 
+export const goalInput = z.object({
+  name: z.string().min(1),
+  monthlyAmount: money,
+  targetAmount: money.nullish(),
+});
+
+export const contributeInput = z.object({
+  amount: z.coerce.number(), // may be negative to withdraw
+});
+
 export const loginInput = z.object({
   email: z.string().email(),
   password: z.string().min(1),

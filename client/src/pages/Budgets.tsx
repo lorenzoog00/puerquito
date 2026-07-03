@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCategories, useTransactions, useMutate } from "../hooks";
 import { Money } from "../components/Money";
+import { SubHeader } from "../components/SubHeader";
 
 function thisMonth() {
   const d = new Date();
@@ -35,8 +36,8 @@ export function Budgets() {
   const budgeted = categories.filter((c: any) => c.type === "expense" && c.monthlyBudget != null);
 
   return (
-    <div>
-      <h2>Presupuestos <small>({month})</small></h2>
+    <div className="screen">
+      <SubHeader title="Presupuestos" />
 
       <div className="card">
         {budgeted.length === 0 && <small>Define un presupuesto mensual en una categoría de gasto.</small>}

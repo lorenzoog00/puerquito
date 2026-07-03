@@ -17,6 +17,8 @@ export const usePresets = () =>
   useQuery({ queryKey: ["presets"], queryFn: () => api("/api/presets") });
 export const useSettings = () =>
   useQuery({ queryKey: ["settings"], queryFn: () => api("/api/settings") });
+export const useGoals = () =>
+  useQuery({ queryKey: ["goals"], queryFn: () => api("/api/goals") });
 
 export function useMutate(invalidate: string[]) {
   const qc = useQueryClient();

@@ -15,6 +15,13 @@
       "when": 1783048379171,
       "tag": "0001_bumpy_hiroim",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783049991309,
+      "tag": "0002_right_carlie_cooper",
+      "breakpoints": true
     }
   ]
 }

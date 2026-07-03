@@ -8,6 +8,7 @@ import { mountRecurring } from "./routes/recurring";
 import { mountSavings } from "./routes/savings";
 import { mountPresets } from "./routes/presets";
 import { mountSettings } from "./routes/settings";
+import { mountGoals } from "./routes/goals";
 
 export function createApp(): Express {
   const app = express();
@@ -22,6 +23,7 @@ export function createApp(): Express {
   mountSavings(app);
   mountPresets(app);
   mountSettings(app);
+  mountGoals(app);
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });

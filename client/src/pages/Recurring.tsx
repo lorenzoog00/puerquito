@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRecurring, useAccounts, useMutate } from "../hooks";
 import { Money } from "../components/Money";
+import { SubHeader } from "../components/SubHeader";
 
 export function Recurring() {
   const { data: recs = [] } = useRecurring();
@@ -27,8 +28,8 @@ export function Recurring() {
   const accName = (id: number) => accounts.find((a: any) => a.id === id)?.name ?? "—";
 
   return (
-    <div>
-      <h2>Pagos recurrentes</h2>
+    <div className="screen">
+      <SubHeader title="Recurrentes" />
       <div className="card">
         <table>
           <thead><tr><th>Nombre</th><th>Monto</th><th>Cuenta</th><th>Frecuencia</th><th>Próximo</th><th></th></tr></thead>

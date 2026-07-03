@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { usePresets, useSettings, useGoal, useAccounts, useCategories, useMutate } from "../hooks";
 import { Money } from "../components/Money";
+import { SubHeader } from "../components/SubHeader";
 
 export function Ajustes() {
   const { data: settings } = useSettings();
@@ -31,8 +32,8 @@ export function Ajustes() {
   const accName = (id: number) => accounts.find((a: any) => a.id === id)?.name ?? "—";
 
   return (
-    <div>
-      <div className="page-head"><h2>Ajustes</h2></div>
+    <div className="screen">
+      <SubHeader title="Ajustes" />
 
       <div className="grid">
         <div className="card">
