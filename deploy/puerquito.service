@@ -1,0 +1,14 @@
+[Unit]
+Description=Puerquito personal finance app
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/apps/puerquito/Puerquito
+EnvironmentFile=/root/apps/puerquito/Puerquito/.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
