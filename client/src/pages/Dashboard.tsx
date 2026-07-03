@@ -56,6 +56,22 @@ export function Dashboard() {
   const doneCount = (ahorroDone ? 1 : 0) + goalItems.filter((i: any) => i.done).length;
   const totalCount = 1 + goalItems.length;
 
+  const items = [
+    { key: "ahorro", label: "Ahorrar", amount: target, done: ahorroDone, toggle: toggleAhorro },
+    ...goalItems.map(({ g, done }: any) => ({
+      key: "g" + g.id, label: `Abonar a ${g.name}`, amount: g.monthlyAmount, done, toggle: () => toggleGoal(g, done),
+    })),
+  ];
+  const pendientes = items.filter((i) => !i.done);
+  const hechos = items.filter((i) => i.done);
+  const renderItem = (it: any) => (
+    <button key={it.key} className={"check-item " + (it.done ? "done" : "")} onClick={it.toggle}>
+      <span className="check-circle">{it.done ? "✓" : ""}</span>
+      <span className="check-label">{it.label}</span>
+      <span className="check-amount"><Money cents={it.amount} /></span>
+    </button>
+  );
+
   function tapPreset(p: any) {
     logPreset.mutate(
       { path: `/api/presets/${p.id}/log`, method: "POST" },
@@ -85,21 +101,14 @@ export function Dashboard() {
           <span className="pill">{doneCount} de {totalCount}</span>
         </div>
 
-        <button className={"check-item " + (ahorroDone ? "done" : "")} onClick={toggleAhorro}>
-          <span className="check-circle">{ahorroDone ? "✓" : ""}</span>
-          <span className="check-label">Ahorrar</span>
-          <span className="check-amount"><Money cents={target} /></span>
-        </button>
+        {pendientes.map(renderItem)}
 
-        {goalItems.map(({ g, done }: any) => (
-          <button key={g.id} className={"check-item " + (done ? "done" : "")} onClick={() => toggleGoal(g, done)}>
-            <span className="check-circle">{done ? "✓" : ""}</span>
-            <span className="check-label">Abonar a {g.name}</span>
-            <span className="check-amount"><Money cents={g.monthlyAmount} /></span>
-          </button>
-        ))}
+        {pendientes.length === 0 && <p className="done-all">¡Todo listo este mes!</p>}
 
-        {goalItems.length === 0 && <p className="muted" style={{ margin: "6px 0 0" }}>Agrega metas en la pestaña Metas para verlas aquí.</p>}
+        {hechos.length > 0 && <div className="done-label">Pagado este mes</div>}
+        {hechos.map(renderItem)}
+
+        {goalItems.length === 0 && <p className="muted" style={{ margin: "8px 0 0" }}>Agrega metas en la pestaña Metas para verlas aquí.</p>}
       </div>
 
       <button className="big-log" onClick={() => nav("/registrar")}>+ Registrar gasto</button>
