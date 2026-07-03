@@ -6,6 +6,8 @@ import { mountCategories } from "./routes/categories";
 import { mountTransactions } from "./routes/transactions";
 import { mountRecurring } from "./routes/recurring";
 import { mountSavings } from "./routes/savings";
+import { mountPresets } from "./routes/presets";
+import { mountSettings } from "./routes/settings";
 
 export function createApp(): Express {
   const app = express();
@@ -18,6 +20,8 @@ export function createApp(): Express {
   mountTransactions(app);
   mountRecurring(app);
   mountSavings(app);
+  mountPresets(app);
+  mountSettings(app);
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });

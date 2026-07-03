@@ -43,7 +43,7 @@ export function Ahorro() {
 
   return (
     <div>
-      <h2>Ahorro 🐷</h2>
+      <div className="page-head"><h2>Ahorro</h2></div>
 
       <div className="grid">
         <div className="card">

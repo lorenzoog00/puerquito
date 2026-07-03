@@ -8,6 +8,13 @@
       "when": 1783044395963,
       "tag": "0000_medical_vivisector",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783048379171,
+      "tag": "0001_bumpy_hiroim",
+      "breakpoints": true
     }
   ]
 }

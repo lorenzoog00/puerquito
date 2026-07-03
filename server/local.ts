@@ -13,18 +13,15 @@ process.env.PORT ||= "5002";
 
 const { migrate } = await import("drizzle-orm/pglite/migrator");
 const { db } = await import("./db");
-const { savingsGoal } = await import("@shared/schema");
 const { createApp } = await import("./app");
+const { seedPersonalData } = await import("./seedData");
 
 await migrate(db as any, { migrationsFolder: "./drizzle" });
-const existing = await db.select().from(savingsGoal).limit(1);
-if (existing.length === 0) {
-  await db.insert(savingsGoal).values({ quincenaTarget: 0 });
-}
+await seedPersonalData();
 
 const port = Number(process.env.PORT);
 createApp().listen(port, () => {
-  console.log(`\n🐷  Puerquito (local) -> http://localhost:${port}`);
-  console.log(`    Login: ${process.env.SEED_EMAIL} / ${process.env.SEED_PASSWORD}`);
-  console.log(`    Data persists in ./${process.env.PGLITE_DIR}\n`);
+  console.log(`\nPuerquito (local) -> http://localhost:${port}`);
+  console.log(`  Login: ${process.env.SEED_EMAIL} / ${process.env.SEED_PASSWORD}`);
+  console.log(`  Data persists in ./${process.env.PGLITE_DIR}\n`);
 });

@@ -8,6 +8,7 @@ import { Budgets } from "./pages/Budgets";
 import { Accounts } from "./pages/Accounts";
 import { Recurring } from "./pages/Recurring";
 import { Ahorro } from "./pages/Ahorro";
+import { Ajustes } from "./pages/Ajustes";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/recurring" element={<Recurring />} />
             <Route path="/ahorro" element={<Ahorro />} />
+            <Route path="/ajustes" element={<Ajustes />} />
           </Route>
         </Routes>
       </BrowserRouter>

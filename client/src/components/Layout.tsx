@@ -2,12 +2,13 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth";
 
 const links: [string, string][] = [
-  ["/", "Dashboard"],
+  ["/", "Inicio"],
   ["/transactions", "Movimientos"],
   ["/budgets", "Presupuestos"],
   ["/accounts", "Cuentas"],
   ["/recurring", "Recurrentes"],
   ["/ahorro", "Ahorro"],
+  ["/ajustes", "Ajustes"],
 ];
 
 export function Layout() {
@@ -15,7 +16,7 @@ export function Layout() {
   return (
     <div className="layout">
       <nav className="sidebar">
-        <h1>Puerquito 🐷</h1>
+        <div className="brand">Puerquito</div>
         {links.map(([to, label]) => (
           <NavLink key={to} to={to} end={to === "/"}>
             {label}

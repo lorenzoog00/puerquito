@@ -48,6 +48,19 @@ export const savingsGoalInput = z.object({
   overallGoal: money.nullish(),
 });
 
+export const presetInput = z.object({
+  label: z.string().min(1),
+  amount: money,
+  type: z.enum(["expense", "income"]),
+  accountId: z.number().int().positive(),
+  categoryId: z.number().int().positive().nullish(),
+  sort: z.number().int().default(0),
+});
+
+export const settingsInput = z.object({
+  ownerName: z.string().nullish(),
+});
+
 export const loginInput = z.object({
   email: z.string().email(),
   password: z.string().min(1),

@@ -20,7 +20,7 @@ export function Login() {
   return (
     <div style={{ maxWidth: 340, margin: "80px auto" }}>
       <div className="card">
-        <h1 style={{ fontSize: 28 }}>Puerquito 🐷</h1>
+        <h1 style={{ fontSize: 26, letterSpacing: "-0.02em" }}>Puerquito</h1>
         <p style={{ color: "#6b7280", marginTop: -4 }}>Tus finanzas personales</p>
         <form onSubmit={submit} style={{ display: "grid", gap: 12, marginTop: 12 }}>
           <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />

@@ -13,6 +13,10 @@ export const useSavings = () =>
   useQuery({ queryKey: ["savings"], queryFn: () => api("/api/savings/entries") });
 export const useGoal = () =>
   useQuery({ queryKey: ["goal"], queryFn: () => api("/api/savings/goal") });
+export const usePresets = () =>
+  useQuery({ queryKey: ["presets"], queryFn: () => api("/api/presets") });
+export const useSettings = () =>
+  useQuery({ queryKey: ["settings"], queryFn: () => api("/api/settings") });
 
 export function useMutate(invalidate: string[]) {
   const qc = useQueryClient();
