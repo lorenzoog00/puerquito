@@ -12,6 +12,9 @@ import { mountGoals } from "./routes/goals";
 
 export function createApp(): Express {
   const app = express();
+  // Behind nginx (which terminates HTTPS): trust the proxy so secure session
+  // cookies are set. nginx forwards X-Forwarded-Proto.
+  app.set("trust proxy", 1);
   app.use(express.json());
   app.use(buildSession());
   mountAuth(app);
