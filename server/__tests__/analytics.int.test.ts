@@ -29,4 +29,12 @@ describe("analytics API", () => {
     const current = res.body.months[res.body.months.length - 1];
     expect(current.expense).toBe(10000);
   });
+
+  it("honors a valid non-default months value", async () => {
+    const a = request.agent(createApp());
+    await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
+    const res = await a.get("/api/analytics?months=3");
+    expect(res.status).toBe(200);
+    expect(res.body.months).toHaveLength(3);
+  });
 });
