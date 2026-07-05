@@ -19,6 +19,8 @@ export function Registrar() {
   const [type, setType] = useState("expense");
   const [accountId, setAccountId] = useState<number | "">("");
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [name, setName] = useState("");
+  const [note, setNote] = useState("");
 
   // default account: first card for expense, first bank for income
   const defaultAcc =
@@ -35,13 +37,14 @@ export function Registrar() {
   }
 
   function save() {
-    if (cents <= 0 || !acc) return;
+    if (cents <= 0 || !acc || !name.trim()) return;
     addTxn.mutate(
       {
         path: "/api/transactions",
         method: "POST",
         body: {
           date: new Date().toISOString().slice(0, 10),
+          name: name.trim(),
           amount: cents / 100,
           accountId: Number(acc),
           categoryId: categoryId ? Number(categoryId) : null,
@@ -88,6 +91,13 @@ export function Registrar() {
         </div>
       )}
 
+      <input
+        className="acc-select"
+        placeholder="Nombre (ej. Tacos, Uber)"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
       <div className="amount-display"><Money cents={cents} /></div>
 
       <div className="seg">
@@ -112,7 +122,7 @@ export function Registrar() {
         ))}
       </div>
 
-      <button className="save-btn" disabled={cents <= 0 || addTxn.isPending} onClick={save}>
+      <button className="save-btn" disabled={cents <= 0 || !name.trim() || addTxn.isPending} onClick={save}>
         Guardar
       </button>
     </div>

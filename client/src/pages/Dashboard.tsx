@@ -132,7 +132,7 @@ export function Dashboard() {
         </div>
         {recent.map((t: any) => (
           <div key={t.id} className="between goal-row">
-            <span>{t.note || t.type} <span className="muted" style={{ fontSize: 13 }}>· {t.date.slice(5)}</span></span>
+            <span>{t.name || t.note || t.type} <span className="muted" style={{ fontSize: 13 }}>· {t.date.slice(5)}</span></span>
             <span style={{ color: t.type === "income" ? "var(--good)" : "var(--ink)", fontWeight: 600 }}>
               {t.type === "income" ? "+" : "−"}<Money cents={t.amount} />
             </span>

@@ -40,7 +40,7 @@ export function Transactions() {
         {txns.map((t: any) => (
           <div key={t.id} className="between goal-row">
             <div>
-              <div style={{ fontWeight: 600 }}>{t.note || catName(t.categoryId) || t.type}</div>
+              <div style={{ fontWeight: 600 }}>{t.name || t.note || catName(t.categoryId) || t.type}</div>
               <div className="muted" style={{ fontSize: 13 }}>{t.date.slice(5)} · {accName(t.accountId)}</div>
             </div>
             <div className="row" style={{ flexWrap: "nowrap" }}>
