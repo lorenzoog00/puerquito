@@ -18,12 +18,12 @@ export function Transactions() {
   const accName = (id: number) => accounts.find((a: any) => a.id === id)?.name ?? "—";
   const catName = (id: number | null) => categories.find((c: any) => c.id === id)?.name ?? "";
 
-  const spent = txns.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0);
-  const income = txns.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0);
-
   const [params, setParams] = useSearchParams();
   const catFilter = params.get("categoryId");
   const shown = catFilter ? txns.filter((t: any) => String(t.categoryId) === catFilter) : txns;
+
+  const spent = shown.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0);
+  const income = shown.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0);
 
   return (
     <div className="screen">

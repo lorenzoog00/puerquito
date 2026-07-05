@@ -22,7 +22,7 @@ export function Analisis() {
   const thisMonth = data.months[data.months.length - 1];
   const prevMonth = data.months[data.months.length - 2];
   const delta = prevMonth ? thisMonth.expense - prevMonth.expense : 0;
-  const budgeted = data.categories.filter((c: any) => c.budget != null);
+  const budgeted = data.categories.filter((c: any) => c.budget > 0);
   const savingsData = data.savings.map((s: any) => ({ ...s, label: s.ym.slice(5) }));
 
   return (
