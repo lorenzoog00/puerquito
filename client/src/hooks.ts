@@ -19,6 +19,8 @@ export const useSettings = () =>
   useQuery({ queryKey: ["settings"], queryFn: () => api("/api/settings") });
 export const useGoals = () =>
   useQuery({ queryKey: ["goals"], queryFn: () => api("/api/goals") });
+export const useAnalytics = (months: number) =>
+  useQuery({ queryKey: ["analytics", months], queryFn: () => api(`/api/analytics?months=${months}`) });
 
 export function useMutate(invalidate: string[]) {
   const qc = useQueryClient();

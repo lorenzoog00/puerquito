@@ -9,6 +9,7 @@ import { mountSavings } from "./routes/savings";
 import { mountPresets } from "./routes/presets";
 import { mountSettings } from "./routes/settings";
 import { mountGoals } from "./routes/goals";
+import { mountAnalytics } from "./routes/analytics";
 
 export function createApp(): Express {
   const app = express();
@@ -27,6 +28,7 @@ export function createApp(): Express {
   mountPresets(app);
   mountSettings(app);
   mountGoals(app);
+  mountAnalytics(app);
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });
