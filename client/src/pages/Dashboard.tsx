@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAccounts, useTransactions, useSavings, useGoal, useGoals, usePresets, useSettings, useMutate } from "../hooks";
 import { Money } from "../components/Money";
 import { useToast } from "../toast";
+import { Analisis } from "./Analisis";
 
 function thisMonth() {
   const d = new Date();
@@ -146,6 +147,8 @@ export function Dashboard() {
         ))}
         {recent.length === 0 && <p className="muted" style={{ margin: "4px 0 0" }}>Aún no hay movimientos.</p>}
       </div>
+
+      <Analisis />
     </div>
   );
 }
