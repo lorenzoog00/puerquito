@@ -18,6 +18,7 @@ export function Analisis() {
   const totalSpent = expenseCats.reduce((s: number, c: any) => s + c.spent, 0);
   const monthsData = data.months.map((m: any) => ({ ...m, label: m.ym.slice(5) }));
   const withData = data.months.filter((m: any) => m.expense > 0 || m.income > 0).length;
+  const withSavingsData = data.savings.filter((s: any) => s.saved !== 0).length;
   const thisMonth = data.months[data.months.length - 1];
   const prevMonth = data.months[data.months.length - 2];
   const delta = prevMonth ? thisMonth.expense - prevMonth.expense : 0;
@@ -113,7 +114,7 @@ export function Analisis() {
       {/* Block 4 — savings */}
       <div className="card">
         <h4 style={{ margin: "0 0 8px" }}>Ahorro</h4>
-        {withData < 2 ? (
+        {withSavingsData < 1 ? (
           <p className="muted">Aún no hay suficientes datos.</p>
         ) : (
           <>
