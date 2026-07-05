@@ -18,6 +18,7 @@ export async function createSavingsTransfer(amountCents: number, note: string): 
   if (accId == null) return null;
   const [row] = await db.insert(transactions).values({
     date: new Date().toISOString().slice(0, 10),
+    name: note,
     amount: amountCents,
     accountId: accId,
     categoryId: null,

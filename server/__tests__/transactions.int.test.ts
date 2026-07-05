@@ -17,11 +17,29 @@ describe("transactions API", () => {
     const a = request.agent(createApp());
     await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
     const acc = await a.post("/api/accounts").send({ name: "Cash", type: "cash" });
-    await a.post("/api/transactions").send({ date: "2026-07-10", amount: 12.5, accountId: acc.body.id, type: "expense" });
+    await a.post("/api/transactions").send({ date: "2026-07-10", amount: 12.5, accountId: acc.body.id, type: "expense", name: "Tacos" });
     const jul = await a.get("/api/transactions?month=2026-07");
     expect(jul.body).toHaveLength(1);
     expect(jul.body[0].amount).toBe(1250);
     const aug = await a.get("/api/transactions?month=2026-08");
     expect(aug.body).toHaveLength(0);
+  });
+
+  it("requires a name", async () => {
+    const a = request.agent(createApp());
+    await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
+    const acc = await a.post("/api/accounts").send({ name: "Cash", type: "cash" });
+    const res = await a.post("/api/transactions").send({ date: "2026-07-10", amount: 5, accountId: acc.body.id, type: "expense" });
+    expect(res.status).toBe(400);
+  });
+
+  it("stores name and optional note", async () => {
+    const a = request.agent(createApp());
+    await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
+    const acc = await a.post("/api/accounts").send({ name: "Cash", type: "cash" });
+    const res = await a.post("/api/transactions").send({ date: "2026-07-10", amount: 5, accountId: acc.body.id, type: "expense", name: "Uber", note: "al aeropuerto" });
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("Uber");
+    expect(res.body.note).toBe("al aeropuerto");
   });
 });

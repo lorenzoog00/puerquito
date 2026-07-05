@@ -17,6 +17,7 @@ export const categoryInput = z.object({
 
 export const transactionInput = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  name: z.string().min(1),
   amount: money,
   accountId: z.number().int().positive(),
   categoryId: z.number().int().positive().nullish(),

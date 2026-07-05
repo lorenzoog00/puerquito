@@ -39,4 +39,13 @@ describe("presets API", () => {
     const s = await a.get("/api/settings");
     expect(s.body.ownerName).toBe("Lorenzo");
   });
+
+  it("log sets transaction name from preset label", async () => {
+    const a = request.agent(createApp());
+    await a.post("/api/auth/login").send({ email: "me@test.com", password: "secret" });
+    const acc = await a.post("/api/accounts").send({ name: "Card", type: "card" });
+    const preset = await a.post("/api/presets").send({ label: "Cafecito", amount: 45, type: "expense", accountId: acc.body.id });
+    const logged = await a.post(`/api/presets/${preset.body.id}/log`);
+    expect(logged.body.name).toBe("Cafecito");
+  });
 });

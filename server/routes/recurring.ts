@@ -54,6 +54,7 @@ export function mountRecurring(app: Express) {
     if (!rec) return res.status(404).json({ error: "not found" });
     await db.insert(transactions).values({
       date: new Date().toISOString().slice(0, 10),
+      name: rec.name,
       amount: rec.amount,
       accountId: rec.accountId,
       categoryId: rec.categoryId,

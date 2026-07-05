@@ -47,6 +47,7 @@ export function mountPresets(app: Express) {
     if (!preset) return res.status(404).json({ error: "not found" });
     const [row] = await db.insert(transactions).values({
       date: new Date().toISOString().slice(0, 10),
+      name: preset.label,
       amount: preset.amount,
       accountId: preset.accountId,
       categoryId: preset.categoryId,

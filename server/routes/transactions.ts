@@ -32,6 +32,7 @@ export function mountTransactions(app: Express) {
     if (!p.success) return res.status(400).json({ error: p.error.flatten() });
     const [row] = await db.insert(transactions).values({
       date: p.data.date,
+      name: p.data.name,
       amount: toCents(p.data.amount),
       accountId: p.data.accountId,
       categoryId: p.data.categoryId ?? null,

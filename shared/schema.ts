@@ -19,6 +19,7 @@ export const categories = pgTable("categories", {
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   date: date("date").notNull(),
+  name: text("name"), // required at the input validator; nullable in DB for legacy rows
   amount: integer("amount").notNull(), // cents, always positive
   accountId: integer("account_id").notNull().references(() => accounts.id),
   categoryId: integer("category_id").references(() => categories.id),
