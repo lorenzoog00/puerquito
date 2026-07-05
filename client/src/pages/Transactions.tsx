@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAccounts, useCategories, useTransactions, useMutate } from "../hooks";
 import { Money } from "../components/Money";
 
@@ -20,6 +21,10 @@ export function Transactions() {
   const spent = txns.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0);
   const income = txns.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0);
 
+  const [params, setParams] = useSearchParams();
+  const catFilter = params.get("categoryId");
+  const shown = catFilter ? txns.filter((t: any) => String(t.categoryId) === catFilter) : txns;
+
   return (
     <div className="screen">
       <header className="screen-head between" style={{ width: "100%" }}>
@@ -36,8 +41,15 @@ export function Transactions() {
         </div>
       </div>
 
+      {catFilter && (
+        <div className="between card">
+          <span>Categoría: {catName(Number(catFilter)) || "—"}</span>
+          <button onClick={() => setParams({})}>Quitar filtro ✕</button>
+        </div>
+      )}
+
       <div className="card">
-        {txns.map((t: any) => (
+        {shown.map((t: any) => (
           <div key={t.id} className="between goal-row">
             <div>
               <div style={{ fontWeight: 600 }}>{t.name || t.note || catName(t.categoryId) || t.type}</div>
@@ -51,7 +63,7 @@ export function Transactions() {
             </div>
           </div>
         ))}
-        {txns.length === 0 && <p className="muted">Sin movimientos este mes.</p>}
+        {shown.length === 0 && <p className="muted">Sin movimientos este mes.</p>}
       </div>
     </div>
   );
