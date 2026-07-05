@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-04
 **App:** Puerquito (personal finance, phone-native, Spanish UI)
-**Goal:** Give Lorenzo real insight into spending, trends, budgets, and savings — turn the home screen into a dashboard without losing the daily quick-log flow.
+**Goal:** Give Lorenzo real insight into spending, trends, budgets, and savings — turn the home screen into a dashboard without losing the daily quick-log flow. Plus: every expense gets a name, and a one-time "set starting balances" step so tracking begins from real numbers.
 
 ## Problem
 
@@ -21,6 +21,24 @@ A month-range toggle (**3 / 6 / 12 meses**, default 6) controls the historical b
 2. **Tendencia** — Bar chart, one pair of bars per month in the range (gasto vs ingreso). Shows a "vs mes pasado" delta on this month's total spend.
 3. **¿Vas bien?** — For each category that has a `monthlyBudget`: a progress bar (gastado / presupuesto), colored green → amber → red by usage. Includes "te quedan $X para la quincena" derived from remaining budget. Categories with no budget are omitted.
 4. **Ahorro** — Area/line of cumulative savings over the range (from `savingsEntries` + `goalContributions`), the current-month savings rate (ahorro ÷ ingreso), and progress toward each meta's `targetAmount` / `overallGoal`.
+
+## Named expenses
+
+Every transaction gets a **Nombre** (name), with the existing free-text **note** kept as an optional extra detail.
+
+- **Schema:** add `name text` to `transactions` (nullable in DB so existing rows migrate cleanly; the input validator makes it **required** on new inserts). `note` stays as-is (optional).
+- **Registrar:** add a "Nombre" text input (e.g. "Tacos", "Uber") above the keypad; `save()` includes `name` (and optional `note`) in the POST body. Guardar is disabled until both an amount and a name are present.
+- **Preset quick-log:** `POST /api/presets/:id/log` sets the new transaction's `name` to the preset's `label`, so quick-logged items are named automatically.
+- **Display:** lists (Inicio "Últimos movimientos", Historial) and the analytics ranked list show `name`. Existing nameless rows fall back to `name ?? note ?? category ?? type`.
+- **Validator:** `transactionInput` in `shared/validators.ts` gains `name` (required, non-empty) and `note` (optional).
+
+## Set starting balances
+
+A one-time way to enter what each account actually holds right now, so "Dinero disponible" is real from day one.
+
+- Accounts already store `startingBalance` and expose `PATCH /api/accounts/:id`. Because `balance = startingBalance + Σtxns`, "set current balance" must **back-compute**: `newStartingBalance = enteredBalance − Σtxns` for that account, so the displayed balance equals what the user typed (correct even if transactions already exist).
+- **UI:** on `Accounts.tsx`, each account row gets an "Ajustar saldo" action opening an inline input for the real current balance; on save the client computes the new `startingBalance` from the account's current `balance` and posts the PATCH. (No new endpoint needed.)
+- **First-run nudge:** if the disponible hero is 0 / no non-savings account has a balance, Inicio shows a one-line "Configura tus saldos" link to Cuentas. Dismissible; no forced onboarding wizard (YAGNI).
 
 ## Backend
 
@@ -73,8 +91,14 @@ New `server/__tests__/analytics.test.ts` (vitest + PGlite local DB, same harness
 - `cumulative` savings is monotonic across the range.
 - Auth required (401 without session).
 
+Extend `server/__tests__/transactions.test.ts` (or add cases): `name` is required (400 when missing/empty), `name` + optional `note` persist and return, and preset `/log` sets `name` from the preset label.
+
+Extend the accounts test: PATCH `startingBalance` updates the computed `balance` as expected (back-compute path).
+
 ## Out of scope (YAGNI)
 
 - Net-worth-over-time from historical account balances (needs balance snapshots we don't store) — savings cumulative covers the "is it growing" question for now.
 - CSV export, custom date ranges beyond 3/6/12, multi-currency analytics.
-- Any change to the existing daily-logging flow.
+- "Esta semana" weekly view and payday-aligned weeks (not selected; monthly analytics + starting balances cover the current ask).
+- Reset / clean-slate of seed data (not selected).
+- A forced onboarding wizard — starting balances are set via the existing Cuentas screen plus a dismissible nudge.
