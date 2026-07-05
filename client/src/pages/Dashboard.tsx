@@ -95,6 +95,12 @@ export function Dashboard() {
         <span className="muted">Lo que puedes gastar sin tocar tu ahorro</span>
       </div>
 
+      {disponible === 0 && (
+        <Link to="/accounts" className="card" style={{ display: "block", textAlign: "center" }}>
+          Configura los saldos de tus cuentas →
+        </Link>
+      )}
+
       <div className="card">
         <div className="between" style={{ marginBottom: 8 }}>
           <h3 style={{ margin: 0 }}>Esta quincena</h3>

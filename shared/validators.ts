@@ -5,7 +5,7 @@ const money = z.coerce.number().nonnegative();
 export const accountInput = z.object({
   name: z.string().min(1),
   type: z.enum(["cash", "bank", "card", "savings"]),
-  startingBalance: money.default(0),
+  startingBalance: z.coerce.number().default(0), // signed: adjust-balance can back-compute negatives
   currency: z.string().default("MXN"),
 });
 

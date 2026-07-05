@@ -16,12 +16,23 @@ export function Accounts() {
   const [name, setName] = useState("");
   const [type, setType] = useState("cash");
   const [start, setStart] = useState("0");
+  const [editId, setEditId] = useState<number | null>(null);
+  const [bal, setBal] = useState("");
 
   function add() {
     if (!name) return;
     m.mutate({ path: "/api/accounts", method: "POST", body: { name, type, startingBalance: Number(start) } });
     setName("");
     setStart("0");
+  }
+
+  function saveBalance(a: any) {
+    const enteredPesos = Number(bal);
+    if (Number.isNaN(enteredPesos)) return;
+    const txnDeltaPesos = (a.balance - a.startingBalance) / 100; // net effect of existing txns
+    const newStartingPesos = enteredPesos - txnDeltaPesos;
+    m.mutate({ path: `/api/accounts/${a.id}`, method: "PATCH", body: { startingBalance: newStartingPesos } });
+    setEditId(null);
   }
 
   return (
@@ -34,8 +45,16 @@ export function Accounts() {
             <span>{a.name} <span className="pill">{a.type}</span></span>
             <span className="row">
               <strong><Money cents={a.balance} /></strong>
+              <button onClick={() => { setEditId(a.id); setBal(String(a.balance / 100)); }}>Ajustar</button>
               <button className="danger" onClick={() => m.mutate({ path: `/api/accounts/${a.id}`, method: "DELETE" })}>✕</button>
             </span>
+            {editId === a.id && (
+              <div className="row" style={{ padding: "8px 0" }}>
+                <input type="number" value={bal} onChange={(e) => setBal(e.target.value)} placeholder="Saldo real" />
+                <button onClick={() => saveBalance(a)}>Guardar</button>
+                <button onClick={() => setEditId(null)}>Cancelar</button>
+              </div>
+            )}
           </div>
         ))}
       </div>
