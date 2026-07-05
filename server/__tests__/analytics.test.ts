@@ -42,8 +42,20 @@ describe("buildAnalytics", () => {
     const r = buildAnalytics({ ...base, txns: [
       { date: "2026-07-02", amount: 30000, type: "expense", categoryId: 10, accountId: 1 },
     ]});
-    const comida = r.categories.find((c) => c.id === 10);
-    expect(comida).toEqual({ id: 10, name: "Comida", spent: 30000, budget: 60000 });
+    expect(r.categories).toEqual([{ id: 10, name: "Comida", spent: 30000, budget: 60000 }]);
+  });
+
+  it("keeps a budgeted category even with zero spend", () => {
+    const r = buildAnalytics({ ...base, txns: [] });
+    expect(r.categories).toEqual([{ id: 10, name: "Comida", spent: 0, budget: 60000 }]);
+  });
+
+  it("buckets uncategorized expenses as 'Sin categoría'", () => {
+    const r = buildAnalytics({ ...base, txns: [
+      { date: "2026-07-05", amount: 12000, type: "expense", categoryId: null, accountId: 1 },
+      { date: "2026-07-06", amount: 30000, type: "expense", categoryId: 10, accountId: 1 },
+    ]});
+    expect(r.categories).toContainEqual({ id: null, name: "Sin categoría", spent: 12000, budget: null });
   });
 
   it("computes savings cumulative and savings rate for the current month", () => {
