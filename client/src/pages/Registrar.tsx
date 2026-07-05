@@ -45,6 +45,7 @@ export function Registrar() {
         body: {
           date: new Date().toISOString().slice(0, 10),
           name: name.trim(),
+          note: note.trim() || null,
           amount: cents / 100,
           accountId: Number(acc),
           categoryId: categoryId ? Number(categoryId) : null,
@@ -96,6 +97,13 @@ export function Registrar() {
         placeholder="Nombre (ej. Tacos, Uber)"
         value={name}
         onChange={(e) => setName(e.target.value)}
+      />
+
+      <input
+        className="acc-select"
+        placeholder="Nota (opcional)"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
       />
 
       <div className="amount-display"><Money cents={cents} /></div>
